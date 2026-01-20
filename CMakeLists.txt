@@ -14,6 +14,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE_FILES
     src/main.cpp
+    src/Game.cpp
+    src/GeometryEngine.cpp
+    src/LevelController.cpp
+    src/LevelFactory.cpp
+    src/Renderer.cpp
 )
 
 add_executable(Arkanoid ${SOURCE_FILES})
