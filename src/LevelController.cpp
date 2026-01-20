@@ -3,6 +3,13 @@
 #include "gameobjects/Brick.hpp"
 #include "GeometryEngine.hpp"
 
+namespace
+{
+
+const float MaxPadBounceAngle = 0.45f * SDL_PI_F; // Max angle for the ball to bounce off of the pad - less than 90 degrees
+
+}
+
 LevelController::LevelController(std::shared_ptr<GeometryEngine> a_geometryEngine_sp, const Level& a_level)
     : m_geometryEngine_sp(a_geometryEngine_sp)
     , m_level(a_level)
@@ -149,7 +156,7 @@ LevelController::HandleMouseMotionEvent(const SDL_MouseMotionEvent& a_mouseMotio
 SDL_AppResult
 LevelController::HandleMouseButtonEvent(const SDL_MouseButtonEvent& a_mouseButtonEvent, const SDL_FPoint a_levelMousePosition)
 {
-    // TODO: this is only for debug
+    // Note: this is only for debug
     if (a_mouseButtonEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
         if (a_mouseButtonEvent.button == SDL_BUTTON_LEFT)
@@ -172,10 +179,8 @@ LevelController::launchBall()
 {
     resetBall();
 
-    m_level.ball.geometry.properties.velocity = SDL_FPoint{
-        SDL_randf() * Constants::DefaultBallSpeed * 2 - Constants::DefaultBallSpeed,
-        -Constants::DefaultBallSpeed
-    };
+    const float randomAngleRad = (SDL_randf() * SDL_PI_F * 0.5f) - (SDL_PI_F / 4.0f);
+    m_level.ball.geometry.properties.velocity = m_geometryEngine_sp->RotateVector({0.0f, -Constants::StartingBallSpeed}, randomAngleRad);
     m_level.ballLaunched = true;
 }
 
@@ -200,7 +205,7 @@ LevelController::updatePadMovement(const bool a_moveLeft, const bool a_moveRight
     else
     {
         const float direction = a_moveLeft ? -1.0f : 1.0f;
-        m_level.pad.geometry.properties.velocity = SDL_FPoint{ direction * m_level.pad.maxSpeed, 0.0f };
+        m_level.pad.geometry.properties.velocity = SDL_FPoint{ direction * m_level.pad.speed, 0.0f };
     }
 }
 
@@ -213,12 +218,9 @@ LevelController::bounceBallFromPad()
         if (padContactPoint.y == m_level.pad.geometry.rect.y)
         {
             const float padPosition = (padContactPoint.x - m_level.pad.geometry.rect.x) / m_level.pad.geometry.rect.w;
-            const float maxBallBounceAngleRad = 1.4f; // Approx 80 degrees
-            const float angle = (-maxBallBounceAngleRad * padPosition) + (maxBallBounceAngleRad * (1.0f - padPosition));
-            m_level.ball.geometry.properties.velocity = {
-                -Constants::DefaultBallSpeed * SDL_cosf(angle - SDL_PI_F / 2.0f),
-                Constants::DefaultBallSpeed * SDL_sinf(angle - SDL_PI_F / 2.0f),
-            };
+            const float angle = (-MaxPadBounceAngle * padPosition) + (MaxPadBounceAngle * (1.0f - padPosition));
+
+            m_level.ball.geometry.properties.velocity = m_geometryEngine_sp->RotateVector({0.0f, -Constants::StartingBallSpeed}, angle);
         }
     }
 }

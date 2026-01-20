@@ -49,6 +49,10 @@ Renderer::Init()
         SDL_Log("Couldn't set alpha blend mode: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+    
+    // SDL_SetWindowPosition(m_window_p, 0, 0);
+    // SDL_SetWindowSize(m_window_p, Constants::WINDOW_WIDTH * 2, Constants::WINDOW_HEIGHT * 2);
+    // SDL_SetWindowResizable(m_window_p, false);
 
     return SDL_APP_CONTINUE;
 }
@@ -156,8 +160,8 @@ Renderer::WindowToLevelPosition(const SDL_FPoint &a_windowPosition) const
     SDL_GetWindowSize(m_window_p, &windowW, &windowH);
 
     SDL_FPoint levelPosition{
-        (float)a_windowPosition.x / windowW * Constants::WINDOW_WIDTH,
-        (float)a_windowPosition.y / windowH * Constants::WINDOW_HEIGHT
+        a_windowPosition.x / (float)windowW * Constants::WINDOW_WIDTH,
+        a_windowPosition.y / (float)windowH * Constants::WINDOW_HEIGHT
     };
 
     return levelPosition;
@@ -172,7 +176,7 @@ Renderer::setDrawColor(const SDL_Color& a_color)
 void
 Renderer::renderCircle(const SDL_FPoint& a_center, const float a_radius, const SDL_Color& a_color)
 {
-    const SDL_FColor ballFColor{a_color.r / 255.0f, a_color.g / 255.0f, a_color.b / 255.0f, a_color.a / 255.0f};
+    const SDL_FColor circleFColor{a_color.r / 255.0f, a_color.g / 255.0f, a_color.b / 255.0f, a_color.a / 255.0f};
 
     SDL_Vertex points[Constants::CircleSegments * 3];
 
@@ -181,10 +185,10 @@ Renderer::renderCircle(const SDL_FPoint& a_center, const float a_radius, const S
         float theta = (float)i / (float)Constants::CircleSegments * 2.0f * SDL_PI_F;
         points[i*3].position.x = a_center.x + a_radius * SDL_cosf(theta);
         points[i*3].position.y = a_center.y + a_radius * SDL_sinf(theta);
-        points[i*3].color = ballFColor;
+        points[i*3].color = circleFColor;
 
         points[i*3 + 1].position = a_center;
-        points[i*3 + 1].color = ballFColor;
+        points[i*3 + 1].color = circleFColor;
 
         const int prevIndex = (i == 0) ? (Constants::CircleSegments - 1) : i - 1;
         points[prevIndex*3 + 2] = points[i*3];

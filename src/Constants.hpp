@@ -10,7 +10,8 @@ namespace Constants
     const Uint64 MinDeltaTimeMillis = 1000 / 60;
     const int CircleSegments = 32;
 
-    const float DefaultPadSpeed = 350.0f;
-    const float DefaultBallSpeed = 105.0f;
-    const float DefaultBallSize = 30.0f;
+    const int StartingBallCount = 3;
+    const float StartingBallSize = 30.0f;
+    const float StartingBallSpeed = 300.0f;
+    const float StartingPadSpeed = 450.0f;
 }

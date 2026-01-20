@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ball.hpp"
+#include "Constants.hpp"
 #include "Brick.hpp"
 #include "Pad.hpp"
 
@@ -14,6 +15,6 @@ struct Level {
 
     bool paused = false;
     bool ballLaunched = false;
-    int balls = 3;
+    int balls = Constants::StartingBallCount;
     Uint32 score = 0;
 };

@@ -2,6 +2,19 @@
 
 #include "gameobjects/Level.hpp"
 
+namespace
+{
+
+const float LevelBoundsMargin = 80.0f;
+const float DefaultBrickHeight = 35.0f;
+const float DefaultBrickWidth = 70.0f;
+const float DefaultBrickSpacing = 15.0f;
+
+const float DefaultPadWidth = 140.0f;
+const float DefaultPadHeight = 25.0f;
+
+}
+
 Level
 LevelFactory::CreateLevel(const SDL_FRect& a_levelBounds)
 {
@@ -10,60 +23,60 @@ LevelFactory::CreateLevel(const SDL_FRect& a_levelBounds)
 
     level.bricks.clear();
 
-    const float margin = 100.0f;
-    const float gap = 20.0f;
     const int bricksPerRow = 5;
-    
-    const float brickWidth = (a_levelBounds.w - margin - margin - ((bricksPerRow - 1) * 20.0f)) / 5.0f;
-    const SDL_FPoint brickSize{brickWidth, 30.0f};
+    const SDL_FPoint brickSize{DefaultBrickWidth, DefaultBrickHeight};
+
+    float yOffset = LevelBoundsMargin;
 
     for (int row = 0; row < 7; row++)
     {
-        const float yOffset = a_levelBounds.y + 100.0f + row * 40.0f;
-
         switch (row)
         {
         case 0:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::LowScore, BrickKind::NormalScore, BrickKind::HighScore, BrickKind::NormalScore, BrickKind::LowScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::NormalScore,BrickKind::LowScore, BrickKind::NormalScore, BrickKind::HighScore, BrickKind::NormalScore, BrickKind::LowScore, BrickKind::NormalScore});
             break;
 
         case 1:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::NormalScore, BrickKind::HighScore, BrickKind::HighScore, BrickKind::HighScore, BrickKind::NormalScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::NormalScore, BrickKind::HighScore, BrickKind::HighScore, BrickKind::HighScore, BrickKind::NormalScore});
             break;
 
         case 2:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::HighScore, std::nullopt, std::nullopt, std::nullopt, BrickKind::HighScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::HighScore, std::nullopt, std::nullopt, std::nullopt, BrickKind::HighScore});
             break;
 
         case 3:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::NormalScore, BrickKind::NormalScore, std::nullopt, BrickKind::NormalScore, BrickKind::NormalScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::NormalScore, BrickKind::NormalScore, std::nullopt, BrickKind::NormalScore, BrickKind::NormalScore});
             break;
 
         case 4:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::LowScore, BrickKind::LowScore, std::nullopt, BrickKind::LowScore, BrickKind::LowScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::LowScore, BrickKind::LowScore, std::nullopt, BrickKind::LowScore, BrickKind::LowScore});
             break;
 
         case 5:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::LowScore, BrickKind::LowScore, std::nullopt, BrickKind::LowScore, BrickKind::LowScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::LowScore, BrickKind::LowScore, std::nullopt, BrickKind::LowScore, BrickKind::LowScore});
             break;
 
         default:
-            addBrickRow(level, yOffset, gap, brickSize, {BrickKind::LowScore, BrickKind::LowScore, BrickKind::HighScore, BrickKind::LowScore, BrickKind::LowScore});
+            addBrickRow(level, yOffset, DefaultBrickSpacing, brickSize, {BrickKind::LowScore, BrickKind::LowScore, BrickKind::HighScore, BrickKind::LowScore, BrickKind::LowScore});
             break;
         }
+
+        yOffset += DefaultBrickSpacing + DefaultBrickHeight;
     }
 
     level.pad.geometry.properties.isSolid = true;
     level.pad.geometry.properties.isVisible = true;
-    level.pad.geometry.rect.x = (a_levelBounds.w - 100) / 2;
-    level.pad.geometry.rect.y = a_levelBounds.h - 40;
-    level.pad.geometry.rect.w = 100;
-    level.pad.geometry.rect.h = 20;
-    level.pad.maxSpeed = 120.0f;
+    
+    level.pad.geometry.rect.w = DefaultPadWidth;
+    level.pad.geometry.rect.h = DefaultPadHeight;
+    level.pad.geometry.rect.x = a_levelBounds.x + (a_levelBounds.w / 2.0f) - (level.pad.geometry.rect.w / 2.0);
+    level.pad.geometry.rect.y = a_levelBounds.y + a_levelBounds.h - LevelBoundsMargin - level.pad.geometry.rect.h;
+    
+    level.pad.speed = Constants::StartingPadSpeed;
 
     level.ball.geometry.properties.isSolid = true;
     level.ball.geometry.properties.isVisible = true;
-    level.ball.geometry.radius = Constants::DefaultBallSize / 2.0f;
+    level.ball.geometry.radius = Constants::StartingBallSize / 2.0f;
     level.paused = false;
     level.balls = 3;
     level.score = 0;

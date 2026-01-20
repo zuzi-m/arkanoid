@@ -29,7 +29,7 @@ GeometryEngine::ProcessCollision(CircleGeometry& a_circle, RectGeometry& a_rect,
 {
     bool centerIsInsideRect = false;
     const SDL_FPoint closestPoint = getClosestPointOnRect(a_circle, a_rect, centerIsInsideRect);
-    const SDL_FPoint distanceToClosestPoint{
+    SDL_FPoint distanceToClosestPoint{
         a_circle.center.x - closestPoint.x,
         a_circle.center.y - closestPoint.y
     };
@@ -42,7 +42,7 @@ GeometryEngine::ProcessCollision(CircleGeometry& a_circle, RectGeometry& a_rect,
 
     const float distanceSquared = distanceToClosestPoint.x * distanceToClosestPoint.x +
                                     distanceToClosestPoint.y * distanceToClosestPoint.y;
-    if (distanceSquared < (a_circle.radius * a_circle.radius))
+    if (centerIsInsideRect || distanceSquared < (a_circle.radius * a_circle.radius))
     {
         if (a_contactPoint_p)
         {
@@ -56,10 +56,20 @@ GeometryEngine::ProcessCollision(CircleGeometry& a_circle, RectGeometry& a_rect,
 
         if (centerIsInsideRect)
         {
-            // Push circle out to the edge of the rectangle
-            a_circle.center.x = closestPoint.x + (distanceToClosestPoint.x > 0 ? a_circle.radius : -a_circle.radius);
-            a_circle.center.y = closestPoint.y + (distanceToClosestPoint.y > 0 ? a_circle.radius : -a_circle.radius);
-            return true;
+            // Push circle out to the edge of the rectangle, whichever direction is shortest
+            if (SDL_abs(distanceToClosestPoint.x) > SDL_abs(distanceToClosestPoint.y))
+            {
+                a_circle.center.x = closestPoint.x + (distanceToClosestPoint.x > 0 ? -a_circle.radius : a_circle.radius);
+                a_circle.center.y = closestPoint.y;
+            }
+            else
+            {
+                a_circle.center.x = closestPoint.x;
+                a_circle.center.y = closestPoint.y + (distanceToClosestPoint.y > 0 ? -a_circle.radius : a_circle.radius);
+            }
+
+            distanceToClosestPoint.x = a_circle.center.x - closestPoint.x;
+            distanceToClosestPoint.y = a_circle.center.y - closestPoint.y;
         }
 
         const float normalLength = SDL_sqrtf(distanceSquared);
@@ -77,11 +87,6 @@ GeometryEngine::ProcessCollision(CircleGeometry& a_circle, RectGeometry& a_rect,
             return false;
         }
 
-        //std::cout << "closest point (" << closestPoint.x << ", " << closestPoint.y << ")\n";
-        //std::cout << "distance to closest (" << distanceToClosestPoint.x << ", " << distanceToClosestPoint.y << ")\n";
-        //std::cout << "center (" << a_circle.center.x << ", " << a_circle.center.y << ")\n";
-
-        //SDL_FPoint prev = center;
         a_circle.center.x = closestPoint.x + normal.x * a_circle.radius;
         a_circle.center.y = closestPoint.y + normal.y * a_circle.radius;
         velocity.x -= 2.0f * velocityDotNormal * normal.x;
@@ -97,6 +102,18 @@ GeometryEngine::ProcessCollision(CircleGeometry& a_circle, RectGeometry& a_rect,
     }
 
     return false;
+}
+
+SDL_FPoint
+GeometryEngine::RotateVector(const SDL_FPoint a_vector, const float a_angleRad) const
+{
+    const float cosAngle = SDL_cosf(a_angleRad);
+    const float sinAngle = SDL_sinf(a_angleRad);
+
+    return {
+        a_vector.x * cosAngle + a_vector.y * sinAngle,
+        a_vector.x * sinAngle + a_vector.y * cosAngle,
+    };
 }
 
 SDL_FPoint
