@@ -105,7 +105,7 @@ void Renderer::RenderLevel(const Level &a_level)
     std::stringstream s;
     s << "Balls: " << a_level.balls << "\tScore: " << a_level.score;
     const std::string topText = s.str();
-    const std::string bottomText = a_level.paused ? "Game paused. Press P to resume." : "P: pause, SPACE: launch ball, LEFT,RIGHT: move pad";
+    const std::string bottomText = a_level.paused ? "Game paused. Press P to resume." : "P: pause, SPACE: launch ball, LEFT,RIGHT: move pad, ESC: exit";
 
     SDL_FRect uiRect;
     uiRect.x = 0.0f;
