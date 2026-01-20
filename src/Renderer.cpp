@@ -49,10 +49,9 @@ Renderer::Init()
         SDL_Log("Couldn't set alpha blend mode: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    
-    // SDL_SetWindowPosition(m_window_p, 0, 0);
-    // SDL_SetWindowSize(m_window_p, Constants::WINDOW_WIDTH * 2, Constants::WINDOW_HEIGHT * 2);
-    // SDL_SetWindowResizable(m_window_p, false);
+
+    // Try to maximize window so it looks better
+    SDL_MaximizeWindow(m_window_p);
 
     return SDL_APP_CONTINUE;
 }
@@ -159,6 +158,9 @@ Renderer::WindowToLevelPosition(const SDL_FPoint &a_windowPosition) const
     int windowW, windowH;
     SDL_GetWindowSize(m_window_p, &windowW, &windowH);
 
+    // Note: this conversion is not working correctly - need to consider that when window is resized it might
+    //       have different aspect ratio from the logical coordinates in which case the letterboxing offsets
+    //       the logical coordinates
     SDL_FPoint levelPosition{
         a_windowPosition.x / (float)windowW * Constants::WINDOW_WIDTH,
         a_windowPosition.y / (float)windowH * Constants::WINDOW_HEIGHT
